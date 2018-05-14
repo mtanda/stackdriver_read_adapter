@@ -1,0 +1,15 @@
+required = [
+  "gopkg.in/fsnotify.v1"
+]
+
+[[constraint]]
+  name = "gopkg.in/fsnotify.v1"
+  source = "https://github.com/fsnotify/fsnotify.git"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/prometheus/common"
+
+[[constraint]]
+  name = "github.com/prometheus/prometheus"
+  version = "v2.2.1"
