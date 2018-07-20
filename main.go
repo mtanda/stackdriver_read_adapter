@@ -35,14 +35,13 @@ func runQuery(monitoringService *monitoring.Service, projectID string, q *prompb
 		var matcher string
 		switch m.Type {
 		case prompb.LabelMatcher_EQ:
+			fallthrough
+		case prompb.LabelMatcher_RE:
 			matcher = "="
 		case prompb.LabelMatcher_NEQ:
-			matcher = "!="
-		case prompb.LabelMatcher_RE:
 			fallthrough
 		case prompb.LabelMatcher_NRE:
-			log.Error("unsupported matcher")
-			return result
+			matcher = "!="
 		}
 
 		if strings.Index(m.Name, "metric_labels_") == 0 {
@@ -51,11 +50,30 @@ func runQuery(monitoringService *monitoring.Service, projectID string, q *prompb
 			m.Name = strings.Replace(m.Name, "resource_labels_", "resource.labels.", 1)
 		}
 
+		valuePlaceholder := "\"%s\""
+
+		value := m.Value
+		switch m.Type {
+		case prompb.LabelMatcher_RE:
+			fallthrough
+		case prompb.LabelMatcher_NRE:
+			valuePlaceholder = "%s"
+			if strings.LastIndex(value, "|") != -1 {
+				value = "one_of(\"" + strings.Join(strings.Split(value, "|"), "\", \"") + "\")"
+			} else if strings.LastIndex(value, ".*") == len(value)-2 {
+				value = "starts_with(\"" + strings.Replace(value, ".*", "", -1) + "\")"
+			} else if strings.Index(value, ".*") == 0 {
+				value = "ends_with(\"" + strings.Replace(value, ".*", "", -1) + "\")"
+			} else {
+				value = "has_substring(\"" + value + "\")"
+			}
+		}
+
 		switch m.Name {
 		case "__name__":
-			filters = append(filters, fmt.Sprintf("%s%s\"%s\"", "metric.type", matcher, m.Value))
+			filters = append(filters, fmt.Sprintf("%s%s"+valuePlaceholder, "metric.type", matcher, value))
 		default:
-			filters = append(filters, fmt.Sprintf("%s%s\"%s\"", m.Name, matcher, m.Value))
+			filters = append(filters, fmt.Sprintf("%s%s"+valuePlaceholder, m.Name, matcher, value))
 		}
 	}
 
