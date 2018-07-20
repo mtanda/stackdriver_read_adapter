@@ -8,6 +8,7 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -43,6 +44,12 @@ func runQuery(monitoringService *monitoring.Service, projectID string, q *prompb
 			return result
 		}
 
+		if strings.Index(m.Name, "metric_labels_") == 0 {
+			m.Name = strings.Replace(m.Name, "metric_labels_", "metric.labels.", 1)
+		} else if strings.Index(m.Name, "resource_labels_") == 0 {
+			m.Name = strings.Replace(m.Name, "resource_labels_", "resource.labels.", 1)
+		}
+
 		switch m.Name {
 		case "__name__":
 			filters = append(filters, fmt.Sprintf("%s%s\"%s\"", "metric.type", matcher, m.Value))
@@ -76,6 +83,7 @@ func runQuery(monitoringService *monitoring.Service, projectID string, q *prompb
 
 	for _, sts := range stackdriverTimeSeries {
 		ts := &prompb.TimeSeries{}
+		ts.Labels = append(ts.Labels, &prompb.Label{Name: "__name__", Value: SafeMetricName(sts.Metric.Type)})
 		for key, value := range sts.Metric.Labels {
 			ts.Labels = append(ts.Labels, &prompb.Label{Name: key, Value: value})
 		}
@@ -134,6 +142,19 @@ func createMonitoringService() (*monitoring.Service, error) {
 
 func projectResource(projectID string) string {
 	return "projects/" + projectID
+}
+
+var invalidMetricNamePattern = regexp.MustCompile(`[^a-zA-Z0-9:_]`)
+
+func SafeMetricName(name string) string {
+	if len(name) == 0 {
+		return ""
+	}
+	name = invalidMetricNamePattern.ReplaceAllString(name, "_")
+	if '0' <= name[0] && name[0] <= '9' {
+		name = "_" + name
+	}
+	return name
 }
 
 func main() {
