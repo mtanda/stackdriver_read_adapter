@@ -9,6 +9,7 @@ import (
 	_ "net/http/pprof"
 	"os"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 
@@ -90,6 +91,9 @@ func runQuery(monitoringService *monitoring.Service, projectID string, q *prompb
 		for key, value := range sts.Resource.Labels {
 			ts.Labels = append(ts.Labels, &prompb.Label{Name: key, Value: value})
 		}
+		sort.Slice(sts.Points, func(i, j int) bool {
+			return sts.Points[i].Interval.EndTime < sts.Points[j].Interval.EndTime
+		})
 		for _, point := range sts.Points {
 			if sts.ValueType != "DISTRIBUTION" {
 				var value float64
