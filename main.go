@@ -104,10 +104,10 @@ func runQuery(monitoringService *monitoring.Service, projectID string, q *prompb
 		ts := &prompb.TimeSeries{}
 		ts.Labels = append(ts.Labels, &prompb.Label{Name: "__name__", Value: SafeMetricName(sts.Metric.Type)})
 		for key, value := range sts.Metric.Labels {
-			ts.Labels = append(ts.Labels, &prompb.Label{Name: key, Value: value})
+			ts.Labels = append(ts.Labels, &prompb.Label{Name: "metric_labels_" + key, Value: value})
 		}
 		for key, value := range sts.Resource.Labels {
-			ts.Labels = append(ts.Labels, &prompb.Label{Name: key, Value: value})
+			ts.Labels = append(ts.Labels, &prompb.Label{Name: "resource_labels_" + key, Value: value})
 		}
 		sort.Slice(sts.Points, func(i, j int) bool {
 			return sts.Points[i].Interval.EndTime < sts.Points[j].Interval.EndTime
