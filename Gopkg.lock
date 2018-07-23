@@ -74,8 +74,8 @@
 [[projects]]
   name = "github.com/prometheus/prometheus"
   packages = ["prompb"]
-  revision = "bc6058c81272a8d938c05e75607371284236aadc"
-  version = "v2.2.1"
+  revision = "71af5e29e815795e9dd14742ee7725682fa14b7b"
+  version = "v2.3.2"
 
 [[projects]]
   name = "github.com/sirupsen/logrus"
@@ -232,6 +232,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "1c7b744c86623ce5c2b1d53c99fac160dca800dc2d33a7d5627b421f643ee082"
+  inputs-digest = "3301c7c5cc62eecc54605d47682026d1af20e0550904c4b0dfd718d8491411b6"
   solver-name = "gps-cdcl"
   solver-version = 1
