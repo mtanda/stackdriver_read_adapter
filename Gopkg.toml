@@ -2,6 +2,10 @@ required = [
   "gopkg.in/fsnotify.v1"
 ]
 
+[prune]
+  go-tests = true
+  unused-packages = true
+
 [[constraint]]
   name = "gopkg.in/fsnotify.v1"
   source = "https://github.com/fsnotify/fsnotify.git"
@@ -12,4 +16,4 @@ required = [
 
 [[constraint]]
   name = "github.com/prometheus/prometheus"
-  version = "v2.2.1"
+  version = "v2.2.3"
